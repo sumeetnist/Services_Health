@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "activitylogalerts_Service_Health_Alerts_for_subscription__FreeTier_name": {
+            "defaultValue": "Service Health Alerts for subscription- FreeTier",
+            "type": "String"
+        },
+        "actiongroups_Azure_serviceHealthActionGroup_externalid": {
+            "defaultValue": "/subscriptions/acf66800-2a01-469e-9a86-006498f7af90/resourceGroups/Test_ServiceHealth/providers/microsoft.insights/actiongroups/Azure serviceHealthActionGroup",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "microsoft.insights/activitylogalerts",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('activitylogalerts_Service_Health_Alerts_for_subscription__FreeTier_name')]",
+            "location": "global",
+            "tags": {
+                "Test": "00"
+            },
+            "properties": {
+                "scopes": [
+                    "/subscriptions/acf66800-2a01-469e-9a86-006498f7af90"
+                ],
+                "condition": {
+                    "allOf": [
+                        {
+                            "field": "category",
+                            "equals": "ServiceHealth"
+                        },
+                        {
+                            "field": "properties.impactedServices[*].ImpactedRegions[*].RegionName",
+                            "containsAny": [
+                                "Central US",
+                                "East US",
+                                "East US 2",
+                                "West US",
+                                "West US 2",
+                                "West US 3"
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "actionGroups": [
+                        {
+                            "actionGroupId": "[parameters('actiongroups_Azure_serviceHealthActionGroup_externalid')]",
+                            "webhookProperties": {}
+                        }
+                    ]
+                },
+                "enabled": true,
+                "description": "This alert will send a notification whenever a service health issue is created or updated. The alert will be evaluated only when service health occurs."
+            }
+        }
+    ]
+}
